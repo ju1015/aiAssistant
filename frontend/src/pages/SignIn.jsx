@@ -8,22 +8,28 @@ import axios from "axios"
 
 function SignIn() {
   const [showPassword,setShowPassword]=useState(false);
-  const {serverUrl}=useContext(UserDataContext);
+  const {serverUrl,userData,setUserData}=useContext(UserDataContext);
   const navigate=useNavigate();
   const [password,setPassword]=useState('');
   const [email,setEmail]=useState('');
   const [error,setError]=useState("");
+  const [loading,setLoading]=useState(false);
 
   const handleSignIn=async (e)=>{
     e.preventDefault();
+    setError("");
+    setLoading(true);
     try{
       let result=await axios.post(`${serverUrl}/api/auth/signin`,{
         email,password
       },{withCredentials:true})
-      console.log(result.data);
-
+      setUserData(result.data);
+      setLoading(false);
+      navigate("/customize")
     }catch(err){
       console.log(err);
+      setUserData(null);
+      setLoading(false);
       setError(err.response.data.message)
     }
   }
@@ -35,7 +41,7 @@ function SignIn() {
         <h1 className='text-white text-[30px] font-semibold'>SignIn to <span className='text-blue-500'>Virtual Assistant</span></h1>
 
         <input type="email" placeholder='Enter your Email' className='w-full h-[60px] border-2 border-white bg-transparent
-        text-white placeholder-gray-300 px-[20px] py-[10px] rounded-full text-[18px]' value={email} onChange={(e)=>setEmail(e.target.value)}/>
+        text-white placeholder-gray-300 px-[20px] py-[10px] rounded-full text-[18px]' value={email} onChange={(e)=>setEmail(e.target.value)} required/>
 
         <div className='w-full h-[60px] border-2 border-white bg-transparent text-white rounded-full text-[18px] relative'>
           <input type={showPassword?"text":"password"} placeholder='Enter your Password' className='w-full h-full rounded-full outline-none bg-transparent
@@ -49,8 +55,8 @@ function SignIn() {
           onClick={()=>{setShowPassword(false)}} />}
         </div>
         {error.length>0 && <p className='text-red-500 text-[17px]'>*{error}</p>}
-        <button className='min-w-[150px] mt-[30px] h-[60px] rounded-full text-black bg-white font-semibold text-[19px]'>Sign In</button>
-        <p className='text-[white] text-[18px] cursor-pointer' onClick={()=>navigate('/signup')}>Want to create a new account? <span className='text-blue-400'>Sign In</span></p>
+        <button className='min-w-[150px] mt-[30px] h-[60px] rounded-full text-black bg-white font-semibold text-[19px]' disabled={loading}>{loading?"Loading...":"Sign In"}</button>
+        <p className='text-[white] text-[18px] cursor-pointer' onClick={()=>navigate('/signup')}>Want to create a new account? <span className='text-blue-400'>Sign Up</span></p>
       </form>
     </div>
   )

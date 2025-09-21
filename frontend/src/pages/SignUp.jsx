@@ -8,23 +8,29 @@ import axios from "axios"
 
 function SignUp() {
   const [showPassword,setShowPassword]=useState(false);
-  const {serverUrl}=useContext(UserDataContext);
+  const {serverUrl,userData,setUserData}=useContext(UserDataContext);
   const navigate=useNavigate();
   const [name,setName]=useState('');
   const [password,setPassword]=useState('');
   const [email,setEmail]=useState('');
   const [error,setError]=useState("");
+  const [loading,setLoading]=useState(false);
 
   const handleSignUp=async (e)=>{
     e.preventDefault();
+    setError("");
+    setLoading(true);
     try{
       let result=await axios.post(`${serverUrl}/api/auth/signup`,{
         name,email,password
       },{withCredentials:true})
-      console.log(result.data);
-
+      setUserData(result.data);
+      setLoading(false);
+      navigate("/customize")
     }catch(err){
       console.log(err);
+      setUserData(null);
+      setLoading(false);
       setError(err.response.data.message)
     }
   }
@@ -52,7 +58,7 @@ function SignUp() {
           onClick={()=>{setShowPassword(false)}} />}
         </div>
         {error.length>0 && <p className='text-red-500 text-[17px]'>*{error}</p>}
-        <button className='min-w-[150px] mt-[30px] h-[60px] rounded-full text-black bg-white font-semibold text-[19px]'>Sign Up</button>
+        <button className='min-w-[150px] mt-[30px] h-[60px] rounded-full text-black bg-white font-semibold text-[19px]' disabled={loading}>{loading? "Loading...":"Sing Up"}</button>
         <p className='text-[white] text-[18px] cursor-pointer' onClick={()=>navigate('/signin')}>Already have an account? <span className='text-blue-400'>Sign In</span></p>
       </form>
     </div>

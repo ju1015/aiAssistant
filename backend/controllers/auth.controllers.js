@@ -21,12 +21,13 @@ const signUp=async (req,res)=>{
             password:hashedPass
         })
         
-        const token=await createToken(user._id);
+        const token=createToken(user._id);
         res.cookie("token",token,{
             httpOnly:true,
             maxAge:7*24*60*60*1000,
-            sameSite:"strict",
-            secure:false
+            sameSite:"lax",
+            secure:false,
+            path: "/" 
         });
 
         return res.status(201).json(user);
@@ -49,6 +50,18 @@ const LogIn=async (req,res)=>{
         const isMatch=await bcrypt.compare(password,user.password)
 
         if(!isMatch) return res.status(400).send({message:"Something Went Wrong!"});
+
+        // Create token
+        const token =createToken(user._id); // no need for await
+
+        // Set token as cookie
+        res.cookie("token", token, {
+            httpOnly: true,           // cannot be accessed by frontend JS
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+            sameSite: "lax",       // adjust for cross-origin if needed
+            secure: false, 
+            path: "/"            // true if using HTTPS
+        });
 
         return res.status(200).json(user);
 
